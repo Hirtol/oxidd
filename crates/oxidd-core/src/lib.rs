@@ -937,6 +937,17 @@ pub trait WorkerManager: Manager + Sync {
     /// Get the current number of threads
     fn current_num_threads(&self) -> usize;
 
+    /// Check whether threads should be used
+    fn is_threading_enabled(&self) -> bool {
+        true
+    }
+
+    /// Enable or disable threading temporarily.
+    ///
+    /// It can be advantageous to temporarily disable multithreading (leading to 10x improvements in runtime)
+    /// depending on how large/in-depth the current tree is.
+    fn set_threading_enabled(&mut self, _enabled: bool) {}
+
     /// Execute `op_a` and `op_b` in parallel
     fn join<RA: Send, RB: Send>(
         &self,

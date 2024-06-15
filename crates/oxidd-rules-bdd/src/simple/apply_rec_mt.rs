@@ -545,12 +545,15 @@ where
     }
 
     fn init_depth(manager: &F::Manager<'_>) -> u32 {
-        let n = manager.current_num_threads();
-        if n > 1 {
-            (4096 * n).ilog2()
-        } else {
-            0
+        if manager.is_threading_enabled() {
+            let n = manager.current_num_threads();
+            if n > 1 {
+                // Ensure that in most cases we won't deal with thread contention issues
+                return n.ilog2() + 1;
+            }
         }
+
+        0
     }
 }
 

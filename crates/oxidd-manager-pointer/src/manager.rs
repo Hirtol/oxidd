@@ -179,6 +179,7 @@ where
     gc_ongoing: TryLock,
     reorder_count: u64,
     workers: rayon::ThreadPool,
+    threading_enabled: bool,
     phantom: PhantomData<(TM, R)>,
 }
 
@@ -299,6 +300,7 @@ where
             gc_ongoing: TryLock::new(),
             reorder_count: 0,
             workers,
+            threading_enabled: threads > 1,
             phantom: PhantomData,
         });
         unsafe { std::ptr::write(addr_of_mut!((*slot).manager), data) };
@@ -788,6 +790,16 @@ where
 {
     fn current_num_threads(&self) -> usize {
         self.workers.current_num_threads()
+    }
+
+    #[inline(always)]
+    fn is_threading_enabled(&self) -> bool {
+        self.threading_enabled
+    }
+
+    #[inline(always)]
+    fn set_threading_enabled(&mut self, enabled: bool) {
+        self.threading_enabled = enabled;
     }
 
     fn join<RA: Send, RB: Send>(
