@@ -955,6 +955,12 @@ pub trait WorkerManager: Manager + Sync {
         op_b: impl FnOnce() -> RB + Send,
     ) -> (RA, RB);
 
+    /// Check whether a job should be dispatched on the thread pool (`true`),
+    /// or just executed on the current thread (`false`).
+    fn should_queue_work(&self) -> bool {
+        true
+    }
+
     /// Execute `op` on every worker in the thread pool
     fn broadcast<R: Send>(&self, op: impl Fn(BroadcastContext) -> R + Sync) -> Vec<R>;
 }

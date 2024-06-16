@@ -807,8 +807,17 @@ where
         op_a: impl FnOnce() -> RA + Send,
         op_b: impl FnOnce() -> RB + Send,
     ) -> (RA, RB) {
-        self.workers.join(op_a, op_b)
+        if self.should_queue_work() {
+            self.workers.join(op_a, op_b)
+        } else {
+            (op_a(), op_b())
+        }
     }
+
+    fn should_queue_work(&self) -> bool {
+        !self.workers.current_thread_has_pending_tasks().unwrap_or_default()
+    }
+
 
     fn broadcast<RES: Send>(
         &self,
